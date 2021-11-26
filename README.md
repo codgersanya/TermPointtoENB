@@ -15,22 +15,22 @@ The expected input format is: nodename (source-target) uppercase letters + numbe
 Having the list of wanted X2s, the script logins to each affected node automatically.
 Checks the enbid, the transport config (especially internal IP-address).
 Logs in to the source eNB, checks whether the wanted X2 already exists, creates it if not and then checks the op-status.
-Logs in to the target enb and checks whether the X2 have been autocreated by X2 from the source and whether it's operational.
+Logs in to the target enb and checks whether the termpoint has been autocreated by X2 from the source node and whether it's operational.
 Writes the reult in a table.
-This loop is repeated over all relations.
-If the user doesn't want to leave the X2-creation to X2 on the target, then just the relation need to be repeated on the X2-list -with inversed direction.
+This loop is iterated over all relations.
+If the user doesn't want to let X2 to create the termpoint on target nodes, then just the relation need to be repeated on the X2-list -with inversed direction.
 The script checks and displays if there's no contact to the nodes.
 It checks whether LRAT is defined.
 
-The script is written and tested on Ipsec X2s.
+The script works on Ipsec X2s -if Direct IpSec via X2-feature is operational.
 
-#Results (example):
+Results (example):
 
-#SOURCE-TARGET X2_LDN_source X2_operstate_source target_name X2_LDN_target X2_operstate_target
-#69014BB2-69013BB2: ENodeBFunction=1,EUtraNetwork=1,ExternalENodeBFunction=23430-69013,TermPointToENB=23430-69013 1 (ENABLED) ENodeBFunction=1,EUtraNetwork=1,ExternalENodeBFunction=23430-69014,TermPointToENB=23430-69014 1 (ENABLED)
-#69014BB2-69012BB2: ENodeBFunction=1,EUtraNetwork=1,ExternalENodeBFunction=23430-69012,TermPointToENB=23430-69012 0 (DISABLED) Warning: X2 CRE-FAIL on target!
-#69013BB2-69012BB2: ENodeBFunction=1,EUtraNetwork=1,ExternalENodeBFunction=23430-69012,TermPointToENB=23430-69012 1 (ENABLED) ENodeBFunction=1,EUtraNetwork=1,ExternalENodeBFunction=23430-69013,TermPointToENB=23430-69013 1 (ENABLED)
-#69013BB2-69011BB2: ENodeBFunction=1,EUtraNetwork=1,ExternalENodeBFunction=23430-69011,TermPointToENB=23430-69011 0 (DISABLED) Warning: X2 CRE-FAIL on target!
+SOURCE-TARGET X2_LDN_source X2_operstate_source target_name X2_LDN_target X2_operstate_target
+69014BB2-69013BB2: ENodeBFunction=1,EUtraNetwork=1,ExternalENodeBFunction=23430-69013,TermPointToENB=23430-69013 1 (ENABLED) ENodeBFunction=1,EUtraNetwork=1,ExternalENodeBFunction=23430-69014,TermPointToENB=23430-69014 1 (ENABLED)
+69014BB2-69012BB2: ENodeBFunction=1,EUtraNetwork=1,ExternalENodeBFunction=23430-69012,TermPointToENB=23430-69012 0 (DISABLED) Warning: X2 CRE-FAIL on target!
+69013BB2-69012BB2: ENodeBFunction=1,EUtraNetwork=1,ExternalENodeBFunction=23430-69012,TermPointToENB=23430-69012 1 (ENABLED) ENodeBFunction=1,EUtraNetwork=1,ExternalENodeBFunction=23430-69013,TermPointToENB=23430-69013 1 (ENABLED)
+69013BB2-69011BB2: ENodeBFunction=1,EUtraNetwork=1,ExternalENodeBFunction=23430-69011,TermPointToENB=23430-69011 0 (DISABLED) Warning: X2 CRE-FAIL on target!
 
 Structure:
 The main script (termpointtoenb_main.mos) has 3-additional subs, which need to be placed to the same folder.
