@@ -1,0 +1,72 @@
+#This script is a sub of termpointtoenb_main.mos and cannot be used on it's own!
+
+#*********Initial variables********************************
+!find -name pathtotermpointtoenb_mos >> path_to_pathtotermpointtoenb
+$linecontent = readfile(path_to_pathtotermpointtoenb)
+$path_to_pathtotermpointtoenb = $linecontent[1]
+$linecontent = readfile($path_to_pathtotermpointtoenb)
+$path = $linecontent[1]
+#*********Initial variables ends***************************
+
+l+ $path/log/targetsub.log
+
+lt all
+
+func writedata
+	!echo '$targetenbid'	>>				$path/tmp/targetdata[$sequence].txt
+	!echo '$targetplmnid[mcc]' >>			$path/tmp/targetdata[$sequence].txt
+	!echo '$targetplmnid[mnc]' >>			$path/tmp/targetdata[$sequence].txt
+	!echo '$targetouteraddress' >>	 		$path/tmp/targetdata[$sequence].txt
+	!echo '$targetinneraddress' >>	 		$path/tmp/targetdata[$sequence].txt
+endfunc
+
+func getenbdata
+	get ^eNodeBFunction= enbid$ > $targetenbid
+	get ^eNodeBFunction= plmnid > $targetplmnid
+	
+	get ^eNodeBFunction= sctpX2Ref > $sctpendpointRef
+	if $sctpendpointRef ~ 0
+		get ^eNodeBFunction= sctpRef > $sctpendpointRef
+	fi
+		
+	ma xtwolocalipaddress $sctpendpointRef localIpAddress
+	for $mo in xtwolocalipaddress
+		$xtwolocalipaddressldn = ldn($mo)
+	done
+	
+	get $xtwolocalipaddressldn ^address$ > $targetinneraddress
+	$targetinneraddress = $targetinneraddress -s /.*
+	
+	#ma ipsecendp LocalIPsecEndpoint interfaceList 7
+	#for $mo in ipsecendp
+	#	$ipsecendpldn = ldn($mo)
+	#done
+	#ma targetouteraddressref $ipsecendpldn outerIpAddressRef
+	#for $mo in targetouteraddressref
+	#	$targetouteraddressldn = ldn($mo)
+	#done
+	#get $targetouteraddressldn ^address$ > $targetouteraddress
+	#$targetouteraddress = $targetouteraddress -s /.*
+endfunc
+
+func getsequence
+	$lineContent = readfile($path/tmp/sequence.txt)
+	$sequence = $lineContent[1]
+endfunc
+
+func contactind
+	!echo 'TARGET CONTACT OK' >> $path/tmp/targetcontactok[$sequence].txt
+endfunc
+
+func checkifenb
+	pv $rats
+	if $rats ~ L
+		!echo 'LRAT FOUND TARGET' >> $path/tmp/ratfoundtarget[$sequence].txt
+	fi
+endfunc
+
+getsequence
+contactind
+checkifenb
+getenbdata
+writedata
