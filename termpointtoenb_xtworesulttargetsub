@@ -25,7 +25,7 @@ func xtwocheck
 	for $mo in extenbf
 		$extenbfldn = ldn($mo)
 	done
-	lk $extenbfldn,TermPointToENB
+	pr $extenbfldn,TermPointToENB
 	if $nr_of_mos = 0
 		$xtwonotcreatedontarget = 1
 	else
