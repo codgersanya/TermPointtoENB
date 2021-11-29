@@ -36,7 +36,7 @@ endfunc
 
 
 func extenbfcheck
-		ma extenbf ExternalENodeBFunction eNodeBId ^$sourceenbid$
+		ma extenbf ExternalENodeBFunction eNBId ^$sourceenbid$
 		if $nr_of_mos > 0
 			xtwocheck
 		else
