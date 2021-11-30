@@ -1,0 +1,141 @@
+#This script is a sub of termpointtoenb_main.mos and cannot be used on it's own!
+
+unset all
+
+#*********Initial variables********************************
+!find -name pathtotermpointtoenb_mos >> path_to_pathtotermpointtoenb
+$linecontent = readfile(path_to_pathtotermpointtoenb)
+$path_to_pathtotermpointtoenb = $linecontent[1]
+$linecontent = readfile($path_to_pathtotermpointtoenb)
+$path = $linecontent[1]
+#*********Initial variables ends***************************
+
+l+ $path/log/sourcesub.log
+
+$xtwonotcreatedonsource = 0
+
+lt all
+
+func admstate
+	set $xtwoldn administrativeState 1
+endfunc
+
+func result
+	get $xtwoldn operationalState > $xtwoopstsource
+	if $nr_of_mos = 0
+		$xtwonotcreatedonsource = 1
+	fi
+endfunc
+
+func fetchdataforxtwo
+	$lineContent = readfile($path/tmp/targetdata[$sequence].txt)
+	$targetouteraddress =	$lineContent[4]
+	$targetinneraddress =	$lineContent[5]
+endfunc
+
+func xtwocr
+	crn $xtwoldn
+	end
+	set $xtwoldn ipAddress $targetinneraddress
+   #set $xtwoldn ipsecEpAddress $targetouteraddress
+endfunc
+
+func xtwocheck
+	fetchdataforxtwo
+	ma xtwo $extenbfldn,termpointtoenb
+	if $nr_of_mos > 0
+		for $mo in xtwo
+			$xtwoldn = ldn($mo)
+		done
+		get $xtwoldn ^ipaddress$ > $ipaddress
+	else
+		$xtwoldn = $extenbfldn,TermPointToENB=$targetplmnid[mcc]$targetplmnid[mnc]-$targetenbid
+	fi
+	
+	pr $xtwoldn
+	if $nr_of_mos = 0
+		xtwocr
+	else if $ipaddress != $targetinneraddress$
+		set $xtwoldn ipAddress $targetinneraddress$
+	fi
+endfunc
+
+func fetchdataforextenbf
+	$lineContent = readfile($path/tmp/targetdata[$sequence].txt)
+	$targetenbid =				$lineContent[1]
+	$targetplmnid[mcc] =		$lineContent[2]
+	$targetplmnid[mnc] =		$lineContent[3]
+	$targetplmnid[mncLength] =	$lineContent[6]
+endfunc
+
+func extenbfcr
+	$extenbfldn = $eutranwldn,ExternalENodeBFunction=$targetplmnid[mcc]$targetplmnid[mnc]-$targetenbid
+	crn $extenbfldn
+	enbid $targetenbid
+	eNodeBPlmnId mcc=$targetplmnid[mcc],mnc=$targetplmnid[mnc],mncLength=$targetplmnid[mncLength]
+	end
+endfunc
+
+func extenbfcheck
+	fetchdataforextenbf
+	ma extenbf ExternalENodeBFunction enbid ^$targetenbid$ 
+	if $nr_of_mos = 0
+		extenbfcr
+	else
+		for $mo in extenbf
+			$extenbfldn = ldn($mo)
+		done
+	fi
+endfunc	
+
+func mocheck
+	ma enbf ^ENodeBFunction=
+	for $mo in enbf
+		$enbfldn = ldn($mo)
+	done
+	
+	get $enbfldn enbid > $sourceenbid
+	
+	ma eutranw ^EUtraNetwork=
+	for $mo in eutranw
+		$eutranwldn = ldn($mo)
+	done
+endfunc
+
+func writedata
+	# $linecontent[1] = 				$sourceenbid
+	# $linecontent[2] = 				$xtwonotcreatedonsource
+	# $linecontent[3] =					$xtwoldn
+	# $linecontent[4] =					$xtwoopstsource
+	
+	!echo '$sourceenbid' >>					$path/tmp/sourcedata[$sequence].txt
+	!echo '$xtwonotcreatedonsource' >>		$path/tmp/sourcedata[$sequence].txt
+	!echo '$xtwoldn' >>						$path/tmp/sourcedata[$sequence].txt
+	!echo '$xtwoopstsource' >>				$path/tmp/sourcedata[$sequence].txt
+endfunc
+
+func getsequence
+	$lineContent = readfile($path/tmp/sequence.txt)
+	$sequence = $lineContent[1]
+endfunc
+
+func contactind
+	!echo 'SOURCE CONTACT OK' >> $path/tmp/sourcecontactok[$sequence].txt
+endfunc
+	
+func checkifenb
+	pv $rats
+	if $rats ~ L
+		!echo 'LRAT FOUND SOURCE' >> $path/tmp/ratfoundsource[$sequence].txt
+	fi
+endfunc
+
+getsequence
+contactind
+checkifenb
+mocheck
+extenbfcheck
+xtwocheck
+admstate
+result
+writedata
