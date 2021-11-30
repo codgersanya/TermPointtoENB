@@ -1,0 +1,63 @@
+#This script is a sub of termpointtoenb_main.mos and cannot be used on it's own!
+
+unset all
+
+#*********Initial variables********************************
+!find -name pathtotermpointtoenb_mos >> path_to_pathtotermpointtoenb
+$linecontent = readfile(path_to_pathtotermpointtoenb)
+$path_to_pathtotermpointtoenb = $linecontent[1]
+$linecontent = readfile($path_to_pathtotermpointtoenb)
+$path = $linecontent[1]
+#*********Initial variables ends***************************
+
+l+ $path/log/xtworesulttargetsub.log
+
+lt all
+
+func getdata
+	$linecontent = readfile($path/tmp/sequence.txt)
+	$sequence = $linecontent[1]
+	$linecontent = readfile($path/tmp/sourcedata[$sequence].txt)
+	$sourceenbid = $linecontent[1]
+endfunc
+
+func xtwocheck
+	for $mo in extenbf
+		$extenbfldn = ldn($mo)
+	done
+	pr $extenbfldn,TermPointToENB
+	if $nr_of_mos = 0
+		$xtwonotcreatedontarget = 1
+	else
+		lk $extenbfldn,TermPointToENB
+		for $mo in lk_group
+			$xtwoldn = ldn($mo)
+		done
+		set $xtwoldn administrativeState 1
+		get $xtwoldn operationalstate > $xtwoopsttarget
+	fi
+endfunc
+
+
+func extenbfcheck
+		ma extenbf ExternalENodeBFunction eNBId ^$sourceenbid$
+		if $nr_of_mos > 0
+			xtwocheck
+		else
+			$xtwonotcreatedontarget = 1
+		fi
+endfunc
+
+func writedata
+	# $linecontent[1] = $xtwonotcreatedontarget
+	# $linecontent[2] = $xtwoopsttarget
+	# $linecontent[3] = $xtwoldn
+	
+	!echo '$xtwonotcreatedontarget' >>	$path/tmp/targetresult[$sequence].txt
+	!echo '$xtwoopsttarget' >>			$path/tmp/targetresult[$sequence].txt
+	!echo '$xtwoldn' >>					$path/tmp/targetresult[$sequence].txt
+endfunc
+
+getdata
+extenbfcheck
+writedata
