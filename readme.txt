@@ -5,7 +5,7 @@
 #                                     #
 #*************************************#
 
-termpointtoenb.mos adds X2-interfaces to nodes.
+termpointtoenb_main.mos adds X2-interfaces to nodes.
 The script checks the existence of all relevant MOs, adds them on one side and checks the autocreation on the other-side.
 The only input needed is the list of the wanted X2NR-relation(s), like:
 
@@ -21,7 +21,7 @@ Also, always ensure that variables are set correctly in your ~/.moshellrc so tha
 
 Usage:
 Upload termpointtoenb.mos together with all the subs anywhere under your ~/ on ENM!
-Run termpointtoenb.mos from moshell!
+Run termpointtoenb_main.mos from moshell!
 Doesn't matter whether you are logged in to a node or you just run moshell in offline mode.
 After running the script (run termpointtoenb.mos) it asks whether you have a file with the list of X2s.
 
